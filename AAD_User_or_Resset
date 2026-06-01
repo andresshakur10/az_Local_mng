@@ -1,0 +1,39 @@
+#1. Objetivo
+- Permitir la creación de usuarios o restablecimiento de contraseñas en máquinas virtuales alojadas en Azure Local, utilizando Azure Arc (Run Command) sin necesidad de acceso directo (RDP/SSH).
+
+- 2. Alcance
+- Aplica para:
+
+Máquinas virtuales Windows
+Registradas en Azure Arc
+Administradas desde Azure CLI
+
+- 3. Prerrequisitos
+3.1 Estado de la VM
+```bash
+az connectedmachine show -g rg-azl-ch-prod-001 -n test-002 --query status
+```
+3.2 Azure CLI y extensión instalada
+```bash
+az extension add --name connectedmachine --allow-preview true
+```
+- Creacion del nuevo usuario:
+```bash
+az connectedmachine run-command create --resource-group rg-azl-ch-prod-001 --machine-name test-002 --name CreateUser --location eastus --script "net user beja P@ssw0rd123! /add; net localgroup Administrators beja /add"
+```
+- Con el siguiente script se puede restablecer el password deL USUARIO:
+```bash
+az connectedmachine run-command create --resource-group rg-azl-ch-prod-001 --machine-name test-002 --name ResetPassword --location eastus --script "net user beja .h+O16s82Z;n"
+```
+
+# Proceso para Linux
+```bash
+az connectedmachine run-command create --resource-group rg-azl-ch-prod-001 --machine-name test-002 --name CreateUserLinux --location eastus --script "sudo useradd -m beja; echo 'beja:P@ssw0rd123!' | sudo chpasswd; sudo usermod -aG sudo beja"
+```
+- Reset
+```bash
+az connectedmachine run-command create --resource-group rg-azl-ch-prod-001 --machine-name test-002 --name ResetPasswordLinux --location eastus --script "echo 'beja:P@ssw0rd2026!' | sudo chpasswd"
+```
+
+
+
