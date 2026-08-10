@@ -1,0 +1,107 @@
+# Paso 1. Limpiar el estado de preparación
+
+```bash
+$ErrorActionPreference = "Stop"
+
+$cg = Get-ClusterGroup -Name "Azure Stack HCI Update Service Cluster Group"
+
+Write-Host "Stopping update service cluster group"
+$cg | Stop-ClusterGroup
+
+Write-Host "Getting name of preparation dictionary property"
+
+$prepDict = Get-Item HKLM:\Cluster\ACS\RDictionary\UpdateWinService\UpdateWinService\PreparationDictionary
+
+$propName = $prepDict.Property
+
+if (-not $propName)
+{
+    Write-Host "Unable to find the expected property"
+    return
+}
+
+$nodes = Get-ClusterNode | % Name
+
+Write-Host "Removing property $propName from all nodes: $($nodes -join ',')"
+
+Invoke-Command $nodes {
+    Remove-ItemProperty `
+    -Path HKLM:\Cluster\ACS\RDictionary\UpdateWinService\UpdateWinService\PreparationDictionary `
+    -Name $using:propName
+}
+
+Write-Host "Starting update service cluster group"
+
+$cg | Start-ClusterGroup
+```
+- Get-ClusterGroup | Where-Object {$_.Name -like "*Download*"}
+```bash
+Get-ClusterGroup | Where-Object {$_.Name -like "*Download*"}
+```
+
+Get-ClusterGroup "Azure Stack HCI Download Service Cluster Group"
+
+- Paso 3. Eliminar trabajos BITS bloqueados
+```bash
+Get-BitsTransfer -AllUsers
+```
+```bash
+Get-BitsTransfer -AllUsers | Remove-BitsTransfer
+```
+```bash
+Get-BitsTransfer -AllUsers
+```
+- Paso 4. Eliminar descargas parciales, "Ubica la carpeta del update".
+```bash
+Get-ChildItem -Path "D:*CloudDeployment\Updates" -Recurse *Filter *.aszdownload
+```
+```bash
+Get-ChildItem -Path "C:\" *Recurse -Filter *.aszdownload -Err*rAction SilentlyContinue
+```
+
+- Una vez encontrados:
+```bash
+Rem*ve-Item "RutaCompletaDelArchivo.as*download" -Force
+```
+Paso 5. Mantener apagado el Download Service
+```bash
+Get-ClusterGroup "Azure Stack HCI *ownload Service Cluster Group"
+```
+
+- Paso 6. Descargar el paquete en otro equipo y subirlo a azure local
+
+```bash
+Get-FileHash .\Platform.12*2603.0.3012.zip -Algorithm SHA256 *
+```
+
+- Paso 7. Validar nuevamente el HASH
+```bash
+Get-Fi*eHash "C:\ClusterStorage\Infrastru*ture_1\Updates\Platform.12.2603.0.*012.zip" -Algorithm SHA256
+```
+
+- Paso 8. Importar el paquete manualmente
+
+```bash
+Add-S*lutionUpdate `
+-PackagePath "C:\*lusterStorage\Infrastructure_1\Upd*tes\Platform.12.2603.0.3012.zip"
+```
+
+- Paso 9. Verificar que el update aparece Ready
+```
+Get-SolutionUpdate
+```
+
+- Paso 10. Levantar nuevamente el Download Service
+```bash
+Start-ClusterGroup "Azur* Stack HCI Download Service Cluste* Group"
+```
+
+
+
+
+
+
+
+
+
+
