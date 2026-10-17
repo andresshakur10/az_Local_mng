@@ -3,7 +3,6 @@
 Lo primero que haremos sera validar el estado de los Storage:
 
 bash```
-
 Get-VirtualDisk |
 Select FriendlyName, ProvisioningType, ResiliencySettingName,
        HealthStatus, OperationalStatus,
